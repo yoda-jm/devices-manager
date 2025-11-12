@@ -33,12 +33,38 @@ The goal of this project is to implement the specifications given in the [`docs/
 | **Container Registry** | DockerHub |
 | **Orchestration** | Docker Compose |
 | **Java Version** | 25 (LTS) |
+| **Project Structure** | Maven multi-module |
+
+## Project Structure
+
+Multi-module Maven project with separate deployable artifacts:
+
+```
+devices-manager/
+  pom.xml                         # Parent POM
+  api-specs/                      # OpenAPI 3.1.0 specifications
+  docs/                           # Documentation
+  services/                       # Maven modules
+    common/                       # Shared code
+    statistics-api/               # Statistics API (port 8080)
+    device-registration-api/      # Device Registration API (port 8081)
+```
 
 ## Local Development
 
-Run with dev profile (enables DEBUG logging):
+### Build all modules (required first)
 ```bash
-mvn spring-boot:run -Dspring-boot.run.profiles=dev
+mvn clean install
+```
+
+### Run Statistics API (port 8080)
+```bash
+(cd services/statistics-api && mvn spring-boot:run -Dspring-boot.run.profiles=dev)
+```
+
+### Run Device Registration API (port 8081)
+```bash
+(cd services/device-registration-api && mvn spring-boot:run -Dspring-boot.run.profiles=dev)
 ```
 
 ## Development Guidelines

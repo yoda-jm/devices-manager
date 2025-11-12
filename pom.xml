@@ -13,34 +13,28 @@
     </parent>
 
     <groupId>com.jss</groupId>
-    <artifactId>devices-manager</artifactId>
+    <artifactId>devices-manager-parent</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>Device Manager</name>
-    <description>Device tracking system</description>
+    <packaging>pom</packaging>
+
+    <name>Device Manager Parent</name>
+    <description>Device tracking system - Multi-module project</description>
 
     <properties>
         <java.version>25</java.version>
     </properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
+    <modules>
+        <module>services/common</module>
+        <module>services/statistics-api</module>
+        <module>services/device-registration-api</module>
+    </modules>
 
+    <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
 </project>
