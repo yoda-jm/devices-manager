@@ -67,6 +67,31 @@ mvn clean install
 (cd services/device-registration-api && mvn spring-boot:run -Dspring-boot.run.profiles=dev)
 ```
 
+## Testing the APIs
+
+### Statistics API (port 8080)
+
+**GET /Log/auth/statistics** - Retrieve device statistics by type
+```bash
+curl http://localhost:8080/Log/auth/statistics?deviceType=iOS
+```
+
+**POST /Log/auth** - Log authentication event
+```bash
+curl -X POST http://localhost:8080/Log/auth \
+  -H "Content-Type: application/json" \
+  -d '{"deviceID":"device123","deviceType":"iOS"}'
+```
+
+### Device Registration API (port 8081)
+
+**POST /Device/register** - Register a device
+```bash
+curl -X POST http://localhost:8081/Device/register \
+  -H "Content-Type: application/json" \
+  -d '{"deviceID":"device456","deviceType":"Android"}'
+```
+
 ## Development Guidelines
 
 - **No pull requests initially** - POC mode, direct commits to main branch
