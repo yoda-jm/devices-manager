@@ -1,0 +1,159 @@
+openapi: 3.1.0
+info:
+  title: Statistics API
+  description: |
+    Public API for managing device authentication events and retrieving device statistics.
+
+    This service:
+    - Collects device information upon device auth (forwarding them to the DeviceRegistrationAPI)
+    - Provides statistics on device usage per type
+  version: 0.0.1
+  contact:
+    name: Device Manager Team
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+tags:
+  - name: Statistics
+    description: Device usage discovery and statistics
+
+paths:
+  /Log/auth:
+    post:
+      tags:
+        - Statistics
+      summary: Store information about device authentication event
+      description: |
+        Receives device authentication event, validates input, and forwards to DeviceRegistrationAPI
+        via POST /Device/register.
+
+        Each device has a unique deviceID across all device types.
+      operationId: logAuth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRequest'
+            example:
+              deviceID: "device123"
+              deviceType: "iOS"
+      responses:
+        '200':
+          description: Successfully logged authentication event
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+              example:
+                message: "Authentication event logged successfully"
+                deviceID: "device123"
+                deviceType: "iOS"
+        '400':
+          description: Bad request - invalid input
+          content:
+            application/json:
+              schema:
+                $ref: 'schemas.yaml#/components/schemas/ErrorResponse'
+              example:
+                error: "Invalid input"
+                field: "deviceType"
+                message: "Device type must be one of: iOS, Android, Watch, TV"
+        '502':
+          description: Bad Gateway - DeviceRegistrationAPI unavailable or failed
+          content:
+            application/json:
+              schema:
+                $ref: 'schemas.yaml#/components/schemas/ErrorResponse'
+              example:
+                error: "Registration service unavailable"
+                message: "Failed to register device with DeviceRegistrationAPI"
+
+  /Log/auth/statistics:
+    get:
+      tags:
+        - Statistics
+      summary: Retrieve device registrations by type
+      description: |
+        Queries the database to retrieve the count of registered devices
+        for a specific device type.
+      operationId: getStatistics
+      parameters:
+        - name: deviceType
+          in: query
+          required: true
+          description: Type of device to query
+          schema:
+            $ref: 'schemas.yaml#/components/schemas/DeviceType'
+          example: "iOS"
+      responses:
+        '200':
+          description: Statistics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatisticsResponse'
+              examples:
+                withData:
+                  summary: Devices registered
+                  value:
+                    deviceType: "iOS"
+                    count: 42
+                noData:
+                  summary: No devices registered yet
+                  value:
+                    deviceType: "iOS"
+                    count: 0
+        '400':
+          description: Bad request - invalid device type parameter
+          content:
+            application/json:
+              schema:
+                $ref: 'schemas.yaml#/components/schemas/ErrorResponse'
+              example:
+                error: "Invalid device type"
+                field: "deviceType"
+                message: "Device type must be one of: iOS, Android, Watch, TV"
+
+components:
+  schemas:
+    AuthRequest:
+      type: object
+      required:
+        - deviceID
+        - deviceType
+      properties:
+        deviceID:
+          $ref: 'schemas.yaml#/components/schemas/DeviceID'
+        deviceType:
+          $ref: 'schemas.yaml#/components/schemas/DeviceType'
+
+    AuthResponse:
+      type: object
+      required:
+        - message
+        - deviceID
+        - deviceType
+      properties:
+        message:
+          type: string
+          description: Success message
+        deviceID:
+          $ref: 'schemas.yaml#/components/schemas/DeviceID'
+        deviceType:
+          $ref: 'schemas.yaml#/components/schemas/DeviceType'
+
+    StatisticsResponse:
+      type: object
+      required:
+        - deviceType
+        - count
+      properties:
+        deviceType:
+          $ref: 'schemas.yaml#/components/schemas/DeviceType'
+        count:
+          type: integer
+          minimum: 0
+          description: Count of devices registered for this device type (includes 0)

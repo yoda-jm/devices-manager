@@ -1,0 +1,105 @@
+openapi: 3.1.0
+info:
+  title: Device Registration API
+  description: |
+    Internal API for registering devices with their type.
+
+    Each device has a unique deviceID (unique across all device types).
+
+    The API is not publicly available. When using Docker-Compose
+    the responsibility will be on the infrastructure (making sure
+    the application service is not publicly available and that the
+    Device Statistic API server has access to it).
+    When using Kubernetes or OpenShift, the responsibility is
+    directly in the cluster definition.
+  version: 0.0.1
+  contact:
+    name: Device Manager Team
+
+servers:
+  - url: http://localhost:8081
+    description: Local development server (internal)
+
+tags:
+  - name: Registration
+    description: Device registration operations
+
+paths:
+  /Device/register:
+    post:
+      tags:
+        - Registration
+      summary: Register a device with its type
+      description: |
+        This method creates a new device registration in the database.
+
+        Each device has a unique deviceID across all device types.
+      operationId: registerDevice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+            example:
+              deviceID: "device123"
+              deviceType: "Android"
+      responses:
+        '201':
+          description: Device registered successfully (resource created)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+              example:
+                deviceID: "device123"
+                deviceType: "Android"
+                registeredAt: "2025-11-12T19:15:00Z"
+        '400':
+          description: Bad request - invalid input or validation failed
+          content:
+            application/json:
+              schema:
+                $ref: 'schemas.yaml#/components/schemas/ErrorResponse'
+              example:
+                error: "Invalid device type"
+                field: "deviceType"
+                message: "Device type must be one of: iOS, Android, Watch, TV"
+        '409':
+          description: Conflict - device already registered
+          content:
+            application/json:
+              schema:
+                $ref: 'schemas.yaml#/components/schemas/ErrorResponse'
+              example:
+                error: "Device already registered"
+                message: "Device device123 is already registered"
+
+components:
+  schemas:
+    RegisterRequest:
+      type: object
+      required:
+        - deviceID
+        - deviceType
+      properties:
+        deviceID:
+          $ref: 'schemas.yaml#/components/schemas/DeviceID'
+        deviceType:
+          $ref: 'schemas.yaml#/components/schemas/DeviceType'
+
+    RegisterResponse:
+      type: object
+      required:
+        - deviceID
+        - deviceType
+        - registeredAt
+      properties:
+        deviceID:
+          $ref: 'schemas.yaml#/components/schemas/DeviceID'
+        deviceType:
+          $ref: 'schemas.yaml#/components/schemas/DeviceType'
+        registeredAt:
+          type: string
+          format: date-time
+          description: Timestamp when the device was registered

@@ -1,0 +1,40 @@
+openapi: 3.1.0
+info:
+  title: Shared Schemas
+  description: Common schemas used across Device Manager APIs
+  version: 0.0.1
+
+components:
+  schemas:
+    DeviceID:
+      type: string
+      description: Unique identifier for the device (unique across all device types)
+      minLength: 1
+      maxLength: 255
+      pattern: '^[a-zA-Z0-9_-]+$'
+      example: "device123"
+
+    DeviceType:
+      type: string
+      enum:
+        - iOS
+        - Android
+        - Watch
+        - TV
+      description: Supported device types
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Short error identifier
+        field:
+          type: string
+          description: Field name that caused the error (optional)
+        message:
+          type: string
+          description: Detailed error message
