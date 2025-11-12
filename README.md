@@ -28,14 +28,24 @@ The goal of this project is to implement the specifications given in the [`docs/
 
 | Component | Choice |
 |-----------|--------|
-| **Backend Framework** | Java Spring Boot |
+| **Backend Framework** | Java Spring Boot 3.5.7 (latest stable) |
 | **Database** | MariaDB |
 | **Container Registry** | DockerHub |
 | **Orchestration** | Docker Compose |
+| **Java Version** | 25 (LTS) |
+
+## Local Development
+
+Run with dev profile (enables DEBUG logging):
+```bash
+mvn spring-boot:run -Dspring-boot.run.profiles=dev
+```
 
 ## Development Guidelines
 
 - **No pull requests initially** - POC mode, direct commits to main branch
 - **Unit tests mandatory** - All code must include unit tests
-- **Automated builds** - CI/CD pipeline using GitHub Workflows
+- **Automated builds** - CI/CD pipeline using GitHub Workflows, nightly builds for security checks
 - **Code quality** - Quality gates and test coverage via SonarCloud
+- **Security** - Use an opensource vulnerability checker (probably org.owasp dependency-check-maven, need to check API key requirement)
+- **Database migrations** - Use something like Flyway (do it later if enough time)
