@@ -41,14 +41,55 @@ Multi-module Maven project with separate deployable artifacts:
 
 ```
 devices-manager/
-  pom.xml                         # Parent POM
-  api-specs/                      # OpenAPI 3.1.0 specifications
-  docs/                           # Documentation
-  services/                       # Maven modules
-    common/                       # Shared code
-    statistics-api/               # Statistics API (port 8080)
-    device-registration-api/      # Device Registration API (port 8081)
+  pom.xml                                  # Parent POM
+  api-specs/                               # OpenAPI 3.1.0 specifications
+  docs/                                    # Documentation
+  docker/                                  # Docker configuration
+    docker-compose.yml                     # Full stack setup
+    Dockerfile.statistics-api              # Statistics API container
+    Dockerfile.device-registration-api     # Device Registration API container
+  services/                                # Maven modules
+    common/                                # Shared code
+    statistics-api/                        # Statistics API (port 8080)
+    device-registration-api/               # Device Registration API (port 8081)
 ```
+
+## Docker Deployment
+
+### Setup environment variables
+First, copy the example environment file and customize if needed:
+```bash
+cp docker/.env.example docker/.env
+```
+
+Edit `docker/.env` to set your database credentials and configuration.
+
+### Build JARs locally (required before Docker build)
+```bash
+mvn clean package -DskipTests
+```
+
+### Start all services (MariaDB + APIs)
+```bash
+docker compose -f docker/docker-compose.yml up -d --build
+```
+
+**Note**: Docker images are built from pre-compiled JARs to avoid veth kernel module requirements during build.
+
+### Database Connection Details
+Default values (configurable in `docker/.env`):
+- **Host**: localhost
+- **Port**: 3306 (`MYSQL_PORT`)
+- **Database**: devices_manager (`MYSQL_DATABASE`)
+- **User**: devuser (`MYSQL_USER`)
+- **Password**: devpass (`MYSQL_PASSWORD`)
+- **Root Password**: root (`MYSQL_ROOT_PASSWORD`)
+
+### Services
+- **Statistics API**: http://localhost:8080
+- **Device Registration API**: http://localhost:8081
+
+**Note**: All services use `network_mode: host` to work around veth kernel module requirements on Gentoo.
 
 ## Local Development
 

@@ -12,3 +12,7 @@ target/
 *.swp
 *.swo
 *~
+
+# Environment files
+docker/.env
+.env

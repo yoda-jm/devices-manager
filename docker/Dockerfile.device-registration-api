@@ -1,0 +1,12 @@
+# Runtime-only stage (build locally with: mvn clean package)
+FROM gcr.io/distroless/java25-debian13:nonroot
+WORKDIR /app
+
+# Copy the pre-built JAR from local build
+COPY services/device-registration-api/target/device-registration-api-*.jar /app/app.jar
+
+# Expose port
+EXPOSE 8081
+
+# Run the application
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
