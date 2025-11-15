@@ -33,6 +33,14 @@ services:
     depends_on:
       mariadb:
         condition: service_healthy
+      device-registration-api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:${STATISTICS_API_PORT}/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   device-registration-api:
     build:
@@ -50,6 +58,12 @@ services:
     depends_on:
       mariadb:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:${DEVICE_REGISTRATION_API_PORT}/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
 volumes:
   mariadb_data:
