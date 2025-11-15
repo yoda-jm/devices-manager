@@ -24,9 +24,12 @@ services:
     network_mode: host
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      SERVER_PORT: ${STATISTICS_API_PORT}
       SPRING_DATASOURCE_URL: jdbc:mariadb://localhost:${MYSQL_PORT}/${MYSQL_DATABASE}
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      DEVICE_REGISTRATION_API_URL: http://localhost:${DEVICE_REGISTRATION_API_PORT}
+      DEVICE_REGISTRATION_API_KEY: ${DEVICE_REGISTRATION_API_KEY}
     depends_on:
       mariadb:
         condition: service_healthy
@@ -39,9 +42,11 @@ services:
     network_mode: host
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      SERVER_PORT: ${DEVICE_REGISTRATION_API_PORT}
       SPRING_DATASOURCE_URL: jdbc:mariadb://localhost:${MYSQL_PORT}/${MYSQL_DATABASE}
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      DEVICE_REGISTRATION_API_KEY: ${DEVICE_REGISTRATION_API_KEY}
     depends_on:
       mariadb:
         condition: service_healthy

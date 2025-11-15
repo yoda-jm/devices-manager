@@ -108,6 +108,12 @@ mvn clean install
 (cd services/device-registration-api && mvn spring-boot:run -Dspring-boot.run.profiles=dev)
 ```
 
+### Run Cluster
+```bash
+mvn clean package && docker compose -f docker/docker-compose.yml up --build
+```
+
+
 ## Testing the APIs
 
 ### Statistics API (port 8080)
@@ -126,12 +132,20 @@ curl -X POST http://localhost:8080/Log/auth \
 
 ### Device Registration API (port 8081)
 
+**Note**: Device Registration API requires API key authentication via `X-Device-Registration-API-Key` header.
+
 **POST /Device/register** - Register a device
 ```bash
 curl -X POST http://localhost:8081/Device/register \
+  -H "X-Device-Registration-API-Key: 00000000-0000-0000-0000-000000000000" \
   -H "Content-Type: application/json" \
   -d '{"deviceID":"device456","deviceType":"Android"}'
 ```
+
+**API Key Configuration**:
+- Development: `00000000-0000-0000-0000-000000000000` (configured in application-dev.properties)
+- Docker: Set `DEVICE_REGISTRATION_API_KEY` in `docker/.env`
+- Without valid API key: Returns 401 Unauthorized (no API key) or 403 Forbidden (wrong API key)
 
 ## Development Guidelines
 
