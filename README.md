@@ -81,6 +81,15 @@ docker compose -f docker/docker-compose.yml up -d --build
 
 **Note**: Docker images are built from pre-compiled JARs to avoid veth kernel module requirements during build.
 
+### Reset database (clean start)
+The MariaDB init scripts (`docker/mariadb-init/`) only run on **first startup** with an empty database. To reset and re-run initialization:
+
+```bash
+docker volume rm docker_mariadb_data
+```
+
+**Warning**: This deletes ALL data in the database. Use for development/testing only.
+
 ### Database Connection Details
 Default values (configurable in `docker/.env`):
 - **Host**: localhost
