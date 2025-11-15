@@ -63,7 +63,6 @@
             <plugin>
                 <groupId>org.openapitools</groupId>
                 <artifactId>openapi-generator-maven-plugin</artifactId>
-                <version>${openapi-generator-maven-plugin.version}</version>
                 <executions>
                     <execution>
                         <goals>
@@ -71,15 +70,8 @@
                         </goals>
                         <configuration>
                             <inputSpec>${project.basedir}/../../api-specs/statistics-api.yaml</inputSpec>
-                            <generatorName>spring</generatorName>
                             <apiPackage>com.jss.devicemanager.statistics.api</apiPackage>
                             <modelPackage>com.jss.devicemanager.statistics.model</modelPackage>
-                            <configOptions>
-                                <interfaceOnly>true</interfaceOnly>
-                                <useSpringBoot3>true</useSpringBoot3>
-                                <skipDefaultInterface>true</skipDefaultInterface>
-                                <useTags>true</useTags>
-                            </configOptions>
                         </configuration>
                     </execution>
                 </executions>

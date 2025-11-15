@@ -40,4 +40,36 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.openapitools</groupId>
+                    <artifactId>openapi-generator-maven-plugin</artifactId>
+                    <version>${openapi-generator-maven-plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>generate</goal>
+                            </goals>
+                            <configuration>
+                                <!-- Child modules must specify: inputSpec, apiPackage, modelPackage -->
+                                <generatorName>spring</generatorName>
+                                <configOptions>
+                                    <interfaceOnly>true</interfaceOnly>
+                                    <useSpringBoot3>true</useSpringBoot3>
+                                    <skipDefaultInterface>true</skipDefaultInterface>
+                                    <useTags>true</useTags>
+                                    <!-- Automatically add @JsonInclude(NON_NULL) to all generated models to omit null fields from JSON serialization, respecting OpenAPI spec optional fields for cleaner separation of concerns and consistency -->
+                                    <openApiNullable>false</openApiNullable>
+                                    <additionalModelTypeAnnotations>@com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)</additionalModelTypeAnnotations>
+                                </configOptions>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 </project>
