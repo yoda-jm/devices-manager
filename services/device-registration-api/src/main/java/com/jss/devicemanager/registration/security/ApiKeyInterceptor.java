@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import java.io.IOException;
+
 /**
  * Interceptor to validate API key from X-Device-Registration-API-Key header.
  * Only applied to controllers/methods annotated with @RequireApiKey.
@@ -68,7 +70,7 @@ public class ApiKeyInterceptor implements HandlerInterceptor {
         return true;
     }
 
-    private void writeErrorResponse(HttpServletResponse response, int status, RegisterDevice400Response errorResponse) throws Exception {
+    private void writeErrorResponse(HttpServletResponse response, int status, RegisterDevice400Response errorResponse) throws IOException {
         response.setStatus(status);
         response.setContentType("application/json");
         response.getWriter().write(objectMapper.writeValueAsString(errorResponse));

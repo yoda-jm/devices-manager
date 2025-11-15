@@ -1,5 +1,10 @@
 # Device Manager - DevSecOps Interview Task
 
+[![CI](https://github.com/yoda-jm/devices-manager/actions/workflows/ci.yml/badge.svg)](https://github.com/yoda-jm/devices-manager/actions/workflows/ci.yml)
+[![SonarQube](https://github.com/yoda-jm/devices-manager/actions/workflows/build.yml/badge.svg)](https://github.com/yoda-jm/devices-manager/actions/workflows/build.yml)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=yoda-jm_device-manager-devsecops-interview-task&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=yoda-jm_device-manager-devsecops-interview-task)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=yoda-jm_device-manager-devsecops-interview-task&metric=coverage)](https://sonarcloud.io/summary/new_code?id=yoda-jm_device-manager-devsecops-interview-task)
+
 A device tracking system for identifying the most frequently used device types across multiple platforms.
 
 ## Overview
@@ -146,6 +151,49 @@ curl -X POST http://localhost:8081/Device/register \
 - Development: `00000000-0000-0000-0000-000000000000` (configured in application-dev.properties)
 - Docker: Set `DEVICE_REGISTRATION_API_KEY` in `docker/.env`
 - Without valid API key: Returns 401 Unauthorized (no API key) or 403 Forbidden (wrong API key)
+
+## CI/CD & Quality Monitoring
+
+### GitHub Actions
+The project uses GitHub Actions for continuous integration and code quality analysis.
+
+**Workflows:**
+- **[CI Workflow](https://github.com/yoda-jm/devices-manager/actions/workflows/ci.yml)** - Runs on every push and PR to main branch
+  - Compiles source code
+  - Compiles tests
+  - Runs all unit tests
+  - Generates test reports
+
+- **[SonarQube Workflow](https://github.com/yoda-jm/devices-manager/actions/workflows/build.yml)** - Code quality and security analysis
+  - Runs build and tests with coverage
+  - Executes SonarQube analysis
+  - Uploads results to SonarCloud
+
+**View all workflow runs:** [GitHub Actions](https://github.com/yoda-jm/devices-manager/actions)
+
+### SonarCloud Code Quality
+Code quality metrics, test coverage, and security analysis are tracked in SonarCloud.
+
+**Project Dashboard:** [SonarCloud - Device Manager](https://sonarcloud.io/project/overview?id=yoda-jm_device-manager-devsecops-interview-task)
+
+**Metrics tracked:**
+- Code coverage via JaCoCo
+- Code smells and technical debt
+- Security vulnerabilities
+- Code duplications
+- Maintainability ratings
+
+### Running Tests Locally
+```bash
+# Run all tests
+mvn test
+
+# Run tests with coverage
+mvn verify
+
+# View coverage report
+open target/site/jacoco-aggregate/index.html
+```
 
 ## Development Guidelines
 

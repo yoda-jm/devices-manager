@@ -207,11 +207,17 @@ class ApiKeyInterceptorTest {
 
     // Helper classes for testing
     private static class TestControllerWithoutAnnotation {
-        public void someMethod() {}
+        // Empty method used only for testing HandlerMethod detection
+        public void someMethod() {
+            // No implementation needed - used only to create HandlerMethod instances for testing
+        }
     }
 
     @RequireApiKey
     private static class TestControllerWithAnnotation {
-        public void someMethod() {}
+        // Empty method used only for testing HandlerMethod detection
+        public void someMethod() {
+            // No implementation needed - used only to create HandlerMethod instances for testing
+        }
     }
 }
