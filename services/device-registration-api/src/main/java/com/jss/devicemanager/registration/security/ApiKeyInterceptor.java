@@ -1,6 +1,8 @@
 package com.jss.devicemanager.registration.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jss.devicemanager.common.security.RequireApiKey;
+import com.jss.devicemanager.registration.model.RegisterDevice400Response;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
@@ -23,6 +25,12 @@ public class ApiKeyInterceptor implements HandlerInterceptor {
     @Value("${device.registration.api.key}")
     private String expectedApiKey;
 
+    private final ObjectMapper objectMapper;
+
+    public ApiKeyInterceptor(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         if (!(handler instanceof HandlerMethod)) {
@@ -36,6 +44,7 @@ public class ApiKeyInterceptor implements HandlerInterceptor {
                 || handlerMethod.getBeanType().getAnnotation(RequireApiKey.class) != null;
 
         if (!requiresApiKey) {
+            // API key not required, continue
             return true;
         }
 
@@ -43,21 +52,25 @@ public class ApiKeyInterceptor implements HandlerInterceptor {
 
         if (providedApiKey == null || providedApiKey.isEmpty()) {
             logger.warn("API key missing in request to {}", request.getRequestURI());
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setContentType("application/json");
-            response.getWriter().write("{\"error\":\"Unauthorized\",\"message\":\"API key is required\"}");
+            RegisterDevice400Response errorResponse = new RegisterDevice400Response("Unauthorized", "API key is required");
+            writeErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, errorResponse);
             return false;
         }
 
         if (!expectedApiKey.equals(providedApiKey)) {
             logger.warn("Invalid API key provided for request to {}", request.getRequestURI());
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            response.setContentType("application/json");
-            response.getWriter().write("{\"error\":\"Forbidden\",\"message\":\"Invalid API key\"}");
+            RegisterDevice400Response errorResponse = new RegisterDevice400Response("Forbidden", "Invalid API key");
+            writeErrorResponse(response, HttpServletResponse.SC_FORBIDDEN, errorResponse);
             return false;
         }
 
         logger.debug("API key validated successfully for {}", request.getRequestURI());
         return true;
+    }
+
+    private void writeErrorResponse(HttpServletResponse response, int status, RegisterDevice400Response errorResponse) throws Exception {
+        response.setStatus(status);
+        response.setContentType("application/json");
+        response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
     }
 }
