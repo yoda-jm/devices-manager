@@ -25,6 +25,8 @@
         <swagger-annotations.version>2.2.40</swagger-annotations.version>
         <jackson-databind-nullable.version>0.2.8</jackson-databind-nullable.version>
         <openapi-generator-maven-plugin.version>7.17.0</openapi-generator-maven-plugin.version>
+        <sonar.organization>yoda-jm</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
 
     <modules>
