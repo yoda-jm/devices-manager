@@ -1,9 +1,20 @@
 # Device Manager - DevSecOps Interview Task
 
 [![CI](https://github.com/yoda-jm/devices-manager/actions/workflows/ci.yml/badge.svg)](https://github.com/yoda-jm/devices-manager/actions/workflows/ci.yml)
+[![Docker Publish](https://github.com/yoda-jm/devices-manager/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/yoda-jm/devices-manager/actions/workflows/docker-publish.yml)
 [![SonarQube](https://github.com/yoda-jm/devices-manager/actions/workflows/build.yml/badge.svg)](https://github.com/yoda-jm/devices-manager/actions/workflows/build.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=yoda-jm_device-manager-devsecops-interview-task&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=yoda-jm_device-manager-devsecops-interview-task)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=yoda-jm_device-manager-devsecops-interview-task&metric=coverage)](https://sonarcloud.io/summary/new_code?id=yoda-jm_device-manager-devsecops-interview-task)
+
+## Docker Images
+
+**Statistics API**
+[![Docker Pulls](https://img.shields.io/docker/pulls/vincentleligeour/devices-manager-statistics-api?label=pulls)](https://hub.docker.com/r/vincentleligeour/devices-manager-statistics-api)
+[![Docker Image Size](https://img.shields.io/docker/image-size/vincentleligeour/devices-manager-statistics-api?label=size)](https://hub.docker.com/r/vincentleligeour/devices-manager-statistics-api)
+
+**Device Registration API**
+[![Docker Pulls](https://img.shields.io/docker/pulls/vincentleligeour/devices-manager-device-registration-api?label=pulls)](https://hub.docker.com/r/vincentleligeour/devices-manager-device-registration-api)
+[![Docker Image Size](https://img.shields.io/docker/image-size/vincentleligeour/devices-manager-device-registration-api?label=size)](https://hub.docker.com/r/vincentleligeour/devices-manager-device-registration-api)
 
 A device tracking system for identifying the most frequently used device types across multiple platforms.
 
@@ -50,7 +61,8 @@ devices-manager/
   api-specs/                               # OpenAPI 3.1.0 specifications
   docs/                                    # Documentation
   docker/                                  # Docker configuration
-    docker-compose.yml                     # Full stack setup
+    docker-compose.yml                     # Local development (builds from source)
+    docker-compose.prod.yml                # Production (uses Docker Hub images)
     Dockerfile.statistics-api              # Statistics API container
     Dockerfile.device-registration-api     # Device Registration API container
   services/                                # Maven modules
@@ -69,17 +81,28 @@ cp docker/.env.example docker/.env
 
 Edit `docker/.env` to set your database credentials and configuration.
 
-### Build JARs locally (required before Docker build)
+### Option 1: Local Development (builds from source)
+
+**Build JARs locally (required before Docker build)**
 ```bash
 mvn clean package -DskipTests
 ```
 
-### Start all services (MariaDB + APIs)
+**Start all services (MariaDB + APIs)**
 ```bash
 docker compose -f docker/docker-compose.yml up -d --build
 ```
 
 **Note**: Docker images are built from pre-compiled JARs to avoid veth kernel module requirements during build.
+
+### Option 2: Production Deployment (uses Docker Hub images)
+
+**Start all services using pre-built images from Docker Hub**
+```bash
+docker compose -f docker/docker-compose.prod.yml up -d
+```
+
+**Note**: No Maven build required! This pulls the latest published images from `vincentleligeour/devices-manager-*` on Docker Hub.
 
 ### Reset database (clean start)
 The MariaDB init scripts (`docker/mariadb-init/`) only run on **first startup** with an empty database. To reset and re-run initialization:

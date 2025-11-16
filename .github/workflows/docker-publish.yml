@@ -1,0 +1,118 @@
+name: Publish Docker Images
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
+    branches:
+      - main
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+
+    permissions:
+      contents: read
+
+    env:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+
+    strategy:
+      matrix:
+        service:
+          - name: devices-manager-statistics-api
+            context: .
+            dockerfile: docker/Dockerfile.statistics-api
+            port: 8081
+          - name: devices-manager-device-registration-api
+            context: .
+            dockerfile: docker/Dockerfile.device-registration-api
+            port: 8080
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download JAR artifacts
+        if: github.event_name == 'workflow_run'
+        uses: actions/download-artifact@v4
+        with:
+          name: application-jars
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+          path: artifacts
+
+      - name: Move artifacts to correct location
+        if: github.event_name == 'workflow_run'
+        run: |
+          echo "=== Downloaded artifacts structure ==="
+          find artifacts -type f
+          echo "=== Moving artifacts ==="
+          mkdir -p services/statistics-api/target
+          mkdir -p services/device-registration-api/target
+
+          # Copy from artifacts/{service}/target/ to services/{service}/target/
+          cp -v artifacts/statistics-api/target/*.jar services/statistics-api/target/
+          cp -v artifacts/device-registration-api/target/*.jar services/device-registration-api/target/
+
+          echo "=== Final structure ==="
+          find services -name "*.jar" -type f
+
+      - name: Set up Java 25
+        if: github.event_name != 'workflow_run'
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Build with Maven
+        if: github.event_name != 'workflow_run'
+        run: mvn clean package -DskipTests
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.service.name }}
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.service.context }}
+          file: ${{ matrix.service.dockerfile }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            BUILD_DATE=${{ github.event.repository.updated_at }}
+            VCS_REF=${{ github.sha }}
+
+      - name: Verify image
+        run: |
+          docker pull ${DOCKERHUB_USERNAME}/${{ matrix.service.name }}:latest
+          docker inspect ${DOCKERHUB_USERNAME}/${{ matrix.service.name }}:latest

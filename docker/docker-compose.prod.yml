@@ -1,0 +1,74 @@
+services:
+  mariadb:
+    image: mariadb:latest
+    container_name: devices-manager-db
+    network_mode: host
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      # Pass user credentials to init script
+      MYSQL_FLYWAY_USER: ${MYSQL_FLYWAY_USER}
+      MYSQL_FLYWAY_PASSWORD: ${MYSQL_FLYWAY_PASSWORD}
+      MYSQL_REGISTRATION_USER: ${MYSQL_REGISTRATION_USER}
+      MYSQL_REGISTRATION_PASSWORD: ${MYSQL_REGISTRATION_PASSWORD}
+      MYSQL_STATISTICS_USER: ${MYSQL_STATISTICS_USER}
+      MYSQL_STATISTICS_PASSWORD: ${MYSQL_STATISTICS_PASSWORD}
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - ./mariadb-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  statistics-api:
+    image: vincentleligeour/devices-manager-statistics-api:latest
+    container_name: statistics-api
+    network_mode: host
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      SERVER_PORT: ${STATISTICS_API_PORT}
+      SPRING_DATASOURCE_URL: jdbc:mariadb://localhost:${MYSQL_PORT}/${MYSQL_DATABASE}
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_STATISTICS_USER}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_STATISTICS_PASSWORD}
+      DEVICE_REGISTRATION_API_URL: http://localhost:${DEVICE_REGISTRATION_API_PORT}
+      DEVICE_REGISTRATION_API_KEY: ${DEVICE_REGISTRATION_API_KEY}
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      device-registration-api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:${STATISTICS_API_PORT}/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  device-registration-api:
+    image: vincentleligeour/devices-manager-device-registration-api:latest
+    container_name: device-registration-api
+    network_mode: host
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      SERVER_PORT: ${DEVICE_REGISTRATION_API_PORT}
+      SPRING_DATASOURCE_URL: jdbc:mariadb://localhost:${MYSQL_PORT}/${MYSQL_DATABASE}
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_REGISTRATION_USER}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_REGISTRATION_PASSWORD}
+      DEVICE_REGISTRATION_API_KEY: ${DEVICE_REGISTRATION_API_KEY}
+      # Flyway runs with registration user (needs schema management for migrations)
+      SPRING_FLYWAY_USER: ${MYSQL_FLYWAY_USER}
+      SPRING_FLYWAY_PASSWORD: ${MYSQL_FLYWAY_PASSWORD}
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:${DEVICE_REGISTRATION_API_PORT}/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  mariadb_data:

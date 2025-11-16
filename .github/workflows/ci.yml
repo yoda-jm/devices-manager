@@ -34,6 +34,19 @@ jobs:
     - name: Run tests
       run: mvn test
 
+    - name: Package JARs
+      run: mvn package -DskipTests
+
+    - name: Upload JAR artifacts
+      if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: actions/upload-artifact@v4
+      with:
+        name: application-jars
+        path: |
+          services/statistics-api/target/*.jar
+          services/device-registration-api/target/*.jar
+        retention-days: 1
+
     - name: Generate test report
       if: always()
       uses: dorny/test-reporter@dc3a92680fcc15842eef52e8c4606ea7ce6bd3f3 # this is 2.1.1
