@@ -29,7 +29,7 @@ class DeviceRegistrationServiceTest {
     void registerDevice_shouldSaveNewDevice() {
         // Given
         String deviceId = "device123";
-        Device.DeviceType deviceType = Device.DeviceType.iOS;
+        Device.DeviceType deviceType = Device.DeviceType.IOS;
 
         // When
         boolean result = deviceRegistrationService.registerDevice(deviceId, deviceType);
@@ -46,7 +46,7 @@ class DeviceRegistrationServiceTest {
     void registerDevice_shouldThrowExceptionForDuplicateDevice() {
         // Given
         String deviceId = "device123";
-        Device.DeviceType deviceType = Device.DeviceType.Android;
+        Device.DeviceType deviceType = Device.DeviceType.ANDROID;
 
         when(deviceRepository.save(any(Device.class)))
             .thenThrow(new DataIntegrityViolationException("Duplicate key"));
@@ -64,8 +64,8 @@ class DeviceRegistrationServiceTest {
     void registerDevice_shouldLogWarningWhenDuplicateDeviceHasDifferentType() {
         // Given
         String deviceId = "device123";
-        Device.DeviceType existingType = Device.DeviceType.iOS;
-        Device.DeviceType attemptedType = Device.DeviceType.Android;
+        Device.DeviceType existingType = Device.DeviceType.IOS;
+        Device.DeviceType attemptedType = Device.DeviceType.ANDROID;
 
         Device existingDevice = new Device(deviceId, existingType);
 
@@ -91,7 +91,7 @@ class DeviceRegistrationServiceTest {
     void registerDevice_shouldNotLogWarningWhenDuplicateDeviceHasSameType() {
         // Given
         String deviceId = "device123";
-        Device.DeviceType deviceType = Device.DeviceType.iOS;
+        Device.DeviceType deviceType = Device.DeviceType.IOS;
 
         Device existingDevice = new Device(deviceId, deviceType);
 

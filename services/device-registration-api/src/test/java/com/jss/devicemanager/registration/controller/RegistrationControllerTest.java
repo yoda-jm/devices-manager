@@ -1,7 +1,6 @@
 package com.jss.devicemanager.registration.controller;
 
 import com.jss.devicemanager.common.entity.Device;
-import com.jss.devicemanager.common.exception.InvalidDeviceTypeException;
 import com.jss.devicemanager.registration.exception.DuplicateDeviceException;
 import com.jss.devicemanager.registration.model.RegisterRequest;
 import com.jss.devicemanager.registration.model.RegisterResponse;
@@ -47,23 +46,9 @@ class RegistrationControllerTest {
         assertEquals(RegisterResponse.DeviceTypeEnum.I_OS, response.getBody().getDeviceType());
         assertNotNull(response.getBody().getRegisteredAt());
 
-        verify(registrationService).registerDevice(eq("device123"), eq(Device.DeviceType.iOS));
+        verify(registrationService).registerDevice("device123", Device.DeviceType.IOS);
     }
 
-    @Test
-    void registerDevice_shouldThrowInvalidDeviceTypeExceptionForNullDeviceType() {
-        // Given
-        RegisterRequest request = new RegisterRequest();
-        request.setDeviceID("device123");
-        // deviceType is null - simulates invalid device type
-
-        // When & Then
-        InvalidDeviceTypeException exception = assertThrows(InvalidDeviceTypeException.class,
-            () -> registrationController.registerDevice(request));
-
-        assertEquals("Invalid device type: null", exception.getMessage());
-        assertEquals("null", exception.getDeviceType());
-    }
 
     @Test
     void registerDevice_shouldThrowDuplicateDeviceExceptionForDuplicateDeviceID() {

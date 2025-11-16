@@ -38,13 +38,13 @@ public class StatisticsController implements StatisticsApi {
         StatisticsResponse.DeviceTypeEnum apiDeviceType;
         try {
             apiDeviceType = StatisticsResponse.DeviceTypeEnum.fromValue(deviceType);
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException _) {
             // Invalid device type - throw exception handled by GlobalExceptionHandler
             throw new InvalidDeviceTypeException(deviceType);
         }
 
         // Convert API DeviceType to Entity DeviceType
-        Device.DeviceType entityDeviceType = Device.DeviceType.valueOf(apiDeviceType.getValue());
+        Device.DeviceType entityDeviceType = Device.DeviceType.fromApiValue(apiDeviceType.getValue());
 
         // Query database
         long count = statisticsService.getDeviceCountByType(entityDeviceType);
@@ -73,21 +73,25 @@ public class StatisticsController implements StatisticsApi {
             response.setDeviceType(AuthResponse.DeviceTypeEnum.valueOf(authRequest.getDeviceType().name()));
 
             // Handle different status codes
-            if (statusCode == 200) {
-                response.setMessage("Device successfully registered");
-                logger.info("Device '{}' of type '{}' successfully registered",
-                        authRequest.getDeviceID(), authRequest.getDeviceType());
-            } else if (statusCode == 409) {
-                // Device already exists - note that we cannot know at this point if the
-                // already registered device has the correct type. Type mismatch warnings
-                // are logged by device-registration-api.
-                response.setMessage("Device already registered");
-                logger.debug("Device '{}' already registered", authRequest.getDeviceID());
-            } else {
-                // Unexpected status code
-                logger.warn("Unexpected status code {} from device registration API", statusCode);
-                throw new BadGatewayException(
-                        "Device registration API returned unexpected status: " + statusCode, null);
+            switch (statusCode) {
+                case 200 -> {
+                    response.setMessage("Device successfully registered");
+                    logger.info("Device '{}' of type '{}' successfully registered",
+                            authRequest.getDeviceID(), authRequest.getDeviceType());
+                }
+                case 409 -> {
+                    // Device already exists - note that we cannot know at this point if the
+                    // already registered device has the correct type. Type mismatch warnings
+                    // are logged by device-registration-api.
+                    response.setMessage("Device already registered");
+                    logger.debug("Device '{}' already registered", authRequest.getDeviceID());
+                }
+                default -> {
+                    // Unexpected status code
+                    logger.warn("Unexpected status code {} from device registration API", statusCode);
+                    throw new BadGatewayException(
+                            "Device registration API returned unexpected status: " + statusCode, null);
+                }
             }
 
             return ResponseEntity.ok(response);

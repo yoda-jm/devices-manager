@@ -37,7 +37,7 @@ class StatisticsControllerTest {
     void getStatistics_shouldReturnDeviceCount() {
         // Given
         String deviceType = "iOS";
-        when(statisticsService.getDeviceCountByType(Device.DeviceType.iOS)).thenReturn(42L);
+        when(statisticsService.getDeviceCountByType(Device.DeviceType.IOS)).thenReturn(42L);
 
         // When
         ResponseEntity<StatisticsResponse> response = statisticsController.getStatistics(deviceType);

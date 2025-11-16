@@ -13,7 +13,7 @@ public class Device {
     @Column(name = "device_id", nullable = false, unique = true, length = 255)
     private String deviceId;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = DeviceTypeConverter.class)
     @Column(name = "device_type", nullable = false)
     private DeviceType deviceType;
 
@@ -52,6 +52,37 @@ public class Device {
     }
 
     public enum DeviceType {
-        iOS, Android, Watch, TV
+        IOS("iOS"),
+        ANDROID("Android"),
+        WATCH("Watch"),
+        TV("TV");
+
+        private final String dbValue;
+
+        DeviceType(String dbValue) {
+            this.dbValue = dbValue;
+        }
+
+        public String getDbValue() {
+            return dbValue;
+        }
+
+        public static DeviceType fromDbValue(String dbValue) {
+            for (DeviceType type : values()) {
+                if (type.dbValue.equals(dbValue)) {
+                    return type;
+                }
+            }
+            throw new IllegalArgumentException("Unknown device type: " + dbValue);
+        }
+
+        /**
+         * Converts from API string value to DeviceType enum.
+         * For the moment, API values and database values match (iOS, Android, Watch, TV),
+         * so this method delegates to fromDbValue().
+         */
+        public static DeviceType fromApiValue(String apiValue) {
+            return fromDbValue(apiValue);
+        }
     }
 }

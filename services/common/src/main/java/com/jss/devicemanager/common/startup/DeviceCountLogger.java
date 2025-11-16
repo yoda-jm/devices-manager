@@ -24,10 +24,13 @@ public class DeviceCountLogger implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        long deviceCount = deviceRepository.count();
-        logger.info("=".repeat(80));
-        logger.info("{} started successfully", applicationName);
-        logger.info("Total devices in database: {}", deviceCount);
-        logger.info("=".repeat(80));
+        if (logger.isInfoEnabled()) {
+            long deviceCount = deviceRepository.count();
+            String separator = "=".repeat(80);
+            logger.info(separator);
+            logger.info("{} started successfully", applicationName);
+            logger.info("Total devices in database: {}", deviceCount);
+            logger.info(separator);
+        }
     }
 }

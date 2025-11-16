@@ -73,18 +73,15 @@ public class DeviceRegistrationClient {
             return e.getStatusCode().value();
 
         } catch (HttpServerErrorException e) {
-            // 5xx errors from the registration API
-            logger.error("Device registration API returned server error: status={}", e.getStatusCode());
+            // 5xx errors from the registration API - rethrow for caller to handle
             throw new DeviceRegistrationException("Device registration API returned error: " + e.getStatusCode(), e);
 
         } catch (ResourceAccessException e) {
-            // Connection refused, timeout, etc.
-            logger.error("Failed to connect to device registration API: {}", e.getMessage());
+            // Connection refused, timeout, etc. - rethrow for caller to handle
             throw new DeviceRegistrationException("Device registration API is unavailable", e);
 
         } catch (Exception e) {
-            // Any other unexpected errors
-            logger.error("Unexpected error calling device registration API", e);
+            // Any other unexpected errors - rethrow for caller to handle
             throw new DeviceRegistrationException("Failed to communicate with device registration API", e);
         }
     }

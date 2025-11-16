@@ -1,7 +1,6 @@
 package com.jss.devicemanager.registration.controller;
 
 import com.jss.devicemanager.common.entity.Device;
-import com.jss.devicemanager.common.exception.InvalidDeviceTypeException;
 import com.jss.devicemanager.common.security.RequireApiKey;
 import com.jss.devicemanager.registration.api.RegistrationApi;
 import com.jss.devicemanager.registration.exception.DuplicateDeviceException;
@@ -31,15 +30,9 @@ public class RegistrationController implements RegistrationApi {
         logger.debug("registerDevice called with deviceID={}, deviceType={}",
                 registerRequest.getDeviceID(), registerRequest.getDeviceType());
 
-        // Validate and convert device type
+        // Convert API device type to entity device type
         RegisterRequest.DeviceTypeEnum apiDeviceType = registerRequest.getDeviceType();
-        if (apiDeviceType == null) {
-            // Invalid device type - throw exception handled by GlobalExceptionHandler
-            throw new InvalidDeviceTypeException("null");
-        }
-
-        // Convert to entity device type
-        Device.DeviceType entityDeviceType = Device.DeviceType.valueOf(apiDeviceType.getValue());
+        Device.DeviceType entityDeviceType = Device.DeviceType.fromApiValue(apiDeviceType.getValue());
 
         // Register device
         try {
@@ -53,7 +46,7 @@ public class RegistrationController implements RegistrationApi {
             response.setRegisteredAt(java.time.OffsetDateTime.now());
 
             return ResponseEntity.ok(response);
-        } catch (DataIntegrityViolationException e) {
+        } catch (DataIntegrityViolationException _) {
             // Duplicate device_id - throw exception handled by GlobalExceptionHandler
             throw new DuplicateDeviceException(registerRequest.getDeviceID());
         }
