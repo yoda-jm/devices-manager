@@ -1,0 +1,18 @@
+# Stage 1: Source for wget binary
+FROM busybox:1.36 AS health-check
+
+# Stage 2: Runtime-only distroless (build locally with: mvn clean package)
+FROM gcr.io/distroless/java25-debian13:nonroot
+WORKDIR /app
+
+# Copy wget from busybox for health checks (static binary, no RUN needed)
+COPY --from=health-check /bin/wget /usr/bin/wget
+
+# Copy the pre-built JAR from local build
+COPY services/device-viewer/target/device-viewer-*.jar /app/app.jar
+
+# Expose port
+EXPOSE 8082
+
+# Run the application
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]

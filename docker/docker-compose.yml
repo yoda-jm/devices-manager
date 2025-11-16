@@ -74,5 +74,29 @@ services:
       retries: 5
       start_period: 30s
 
+  device-viewer:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.device-viewer
+    container_name: device-viewer
+    network_mode: host
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      SERVER_PORT: ${DEVICE_VIEWER_PORT}
+      SPRING_DATASOURCE_URL: jdbc:mariadb://localhost:${MYSQL_PORT}/${MYSQL_DATABASE}
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_STATISTICS_USER}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_STATISTICS_PASSWORD}
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      device-registration-api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:${DEVICE_VIEWER_PORT}/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
 volumes:
   mariadb_data:

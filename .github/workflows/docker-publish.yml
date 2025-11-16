@@ -29,11 +29,15 @@ jobs:
           - name: devices-manager-statistics-api
             context: .
             dockerfile: docker/Dockerfile.statistics-api
-            port: 8081
+            port: 8080
           - name: devices-manager-device-registration-api
             context: .
             dockerfile: docker/Dockerfile.device-registration-api
-            port: 8080
+            port: 8081
+          - name: devices-manager-device-viewer
+            context: .
+            dockerfile: docker/Dockerfile.device-viewer
+            port: 8082
 
     steps:
       - name: Checkout code
@@ -56,10 +60,12 @@ jobs:
           echo "=== Moving artifacts ==="
           mkdir -p services/statistics-api/target
           mkdir -p services/device-registration-api/target
+          mkdir -p services/device-viewer/target
 
           # Copy from artifacts/{service}/target/ to services/{service}/target/
           cp -v artifacts/statistics-api/target/*.jar services/statistics-api/target/
           cp -v artifacts/device-registration-api/target/*.jar services/device-registration-api/target/
+          cp -v artifacts/device-viewer/target/*.jar services/device-viewer/target/
 
           echo "=== Final structure ==="
           find services -name "*.jar" -type f

@@ -45,6 +45,7 @@ jobs:
         path: |
           services/statistics-api/target/*.jar
           services/device-registration-api/target/*.jar
+          services/device-viewer/target/*.jar
         retention-days: 1
 
     - name: Generate test report

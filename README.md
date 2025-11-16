@@ -16,6 +16,10 @@
 [![Docker Pulls](https://img.shields.io/docker/pulls/vincentleligeour/devices-manager-device-registration-api?label=pulls)](https://hub.docker.com/r/vincentleligeour/devices-manager-device-registration-api)
 [![Docker Image Size](https://img.shields.io/docker/image-size/vincentleligeour/devices-manager-device-registration-api?label=size)](https://hub.docker.com/r/vincentleligeour/devices-manager-device-registration-api)
 
+**Device Viewer**
+[![Docker Pulls](https://img.shields.io/docker/pulls/vincentleligeour/devices-manager-device-viewer?label=pulls)](https://hub.docker.com/r/vincentleligeour/devices-manager-device-viewer)
+[![Docker Image Size](https://img.shields.io/docker/image-size/vincentleligeour/devices-manager-device-viewer?label=size)](https://hub.docker.com/r/vincentleligeour/devices-manager-device-viewer)
+
 A device tracking system for identifying the most frequently used device types across multiple platforms.
 
 ## Overview
@@ -65,10 +69,12 @@ devices-manager/
     docker-compose.prod.yml                # Production (uses Docker Hub images)
     Dockerfile.statistics-api              # Statistics API container
     Dockerfile.device-registration-api     # Device Registration API container
+    Dockerfile.device-viewer               # Device Viewer container
   services/                                # Maven modules
-    common/                                # Shared code
+    common/                                # Shared code (entities, repositories, utilities)
     statistics-api/                        # Statistics API (port 8080)
     device-registration-api/               # Device Registration API (port 8081)
+    device-viewer/                         # Device Viewer Web UI (port 8082)
 ```
 
 ## Docker Deployment
@@ -125,6 +131,7 @@ Default values (configurable in `docker/.env`):
 ### Services
 - **Statistics API**: http://localhost:8080
 - **Device Registration API**: http://localhost:8081
+- **Device Viewer**: http://localhost:8082 (Web UI for viewing database entries)
 
 **Note**: All services use `network_mode: host` to work around veth kernel module requirements on Gentoo.
 
@@ -143,6 +150,11 @@ mvn clean install
 ### Run Device Registration API (port 8081)
 ```bash
 (cd services/device-registration-api && mvn spring-boot:run -Dspring-boot.run.profiles=dev)
+```
+
+### Run Device Viewer (port 8082)
+```bash
+(cd services/device-viewer && mvn spring-boot:run -Dspring-boot.run.profiles=dev)
 ```
 
 ### Run Cluster

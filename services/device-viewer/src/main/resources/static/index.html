@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Device Manager - Database Viewer</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .stat-card {
+            transition: transform 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        .badge-device-type {
+            font-size: 0.9rem;
+            padding: 0.4em 0.8em;
+        }
+        .search-container {
+            max-width: 600px;
+        }
+        #devicesTable {
+            background-color: white;
+        }
+        .table-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .loading {
+            display: none;
+        }
+        .no-results {
+            display: none;
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-primary mb-4">
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h1">
+                <i class="bi bi-phone"></i> Device Manager - Database Viewer
+            </span>
+        </div>
+    </nav>
+
+    <div class="container-fluid px-4">
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="card stat-card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">
+                            <i class="bi bi-phone-fill"></i> Total Devices
+                        </h6>
+                        <h2 class="card-title mb-0" id="totalDevices">
+                            <span class="spinner-border spinner-border-sm" role="status"></span>
+                        </h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card stat-card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">
+                            <i class="bi bi-apple"></i> iOS Devices
+                        </h6>
+                        <h2 class="card-title mb-0 text-primary" id="iosDevices">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card stat-card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">
+                            <i class="bi bi-android2"></i> Android Devices
+                        </h6>
+                        <h2 class="card-title mb-0 text-success" id="androidDevices">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card stat-card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">
+                            <i class="bi bi-smartwatch"></i> Other Devices
+                        </h6>
+                        <h2 class="card-title mb-0 text-info" id="otherDevices">0</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="search-container mx-auto">
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text bg-white">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text"
+                               class="form-control"
+                               id="searchInput"
+                               placeholder="Search by Device ID or Type...">
+                        <button class="btn btn-outline-secondary" type="button" id="clearSearch">
+                            <i class="bi bi-x-circle"></i> Clear
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Devices Table -->
+        <div class="row">
+            <div class="col-12">
+                <div class="table-container p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="mb-0">
+                            <i class="bi bi-list-ul"></i> Device Registrations
+                        </h4>
+                        <button class="btn btn-primary" id="refreshBtn">
+                            <i class="bi bi-arrow-clockwise"></i> Refresh
+                        </button>
+                    </div>
+
+                    <div class="loading text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2 text-muted">Loading devices...</p>
+                    </div>
+
+                    <div class="no-results">
+                        <i class="bi bi-inbox" style="font-size: 4rem;"></i>
+                        <h5 class="mt-3">No devices found</h5>
+                        <p class="text-muted">Try adjusting your search criteria</p>
+                    </div>
+
+                    <div class="table-responsive" id="tableContainer">
+                        <table class="table table-hover" id="devicesTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th><i class="bi bi-hash"></i> ID</th>
+                                    <th><i class="bi bi-phone"></i> Device ID</th>
+                                    <th><i class="bi bi-tag"></i> Device Type</th>
+                                </tr>
+                            </thead>
+                            <tbody id="devicesTableBody">
+                                <!-- Data will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery and Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            let searchTimeout;
+
+            // Load statistics
+            function loadStatistics() {
+                $.ajax({
+                    url: '/api/statistics',
+                    method: 'GET',
+                    success: function(data) {
+                        $('#totalDevices').text(data.total);
+                        $('#iosDevices').text(data.byType.IOS || 0);
+                        $('#androidDevices').text(data.byType.ANDROID || 0);
+
+                        const other = (data.byType.WATCH || 0) + (data.byType.TV || 0);
+                        $('#otherDevices').text(other);
+                    },
+                    error: function() {
+                        $('#totalDevices').html('<span class="text-danger">Error</span>');
+                    }
+                });
+            }
+
+            // Load devices
+            function loadDevices(search) {
+                $('.loading').show();
+                $('#tableContainer').hide();
+                $('.no-results').hide();
+
+                const url = search ? `/api/devices?search=${encodeURIComponent(search)}` : '/api/devices';
+
+                $.ajax({
+                    url: url,
+                    method: 'GET',
+                    success: function(devices) {
+                        $('.loading').hide();
+
+                        if (devices.length === 0) {
+                            $('.no-results').show();
+                            return;
+                        }
+
+                        $('#tableContainer').show();
+                        const tbody = $('#devicesTableBody');
+                        tbody.empty();
+
+                        devices.forEach(function(device) {
+                            const badgeClass = {
+                                'IOS': 'bg-primary',
+                                'ANDROID': 'bg-success',
+                                'WATCH': 'bg-info',
+                                'TV': 'bg-warning'
+                            }[device.deviceType] || 'bg-secondary';
+
+                            const row = `
+                                <tr>
+                                    <td>${device.id}</td>
+                                    <td><code>${device.deviceId}</code></td>
+                                    <td>
+                                        <span class="badge ${badgeClass} badge-device-type">
+                                            ${device.deviceType}
+                                        </span>
+                                    </td>
+                                </tr>
+                            `;
+                            tbody.append(row);
+                        });
+                    },
+                    error: function() {
+                        $('.loading').hide();
+                        $('#tableContainer').show();
+                        $('#devicesTableBody').html(`
+                            <tr>
+                                <td colspan="3" class="text-center text-danger">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    Error loading devices
+                                </td>
+                            </tr>
+                        `);
+                    }
+                });
+            }
+
+            // Search input handler with debounce
+            $('#searchInput').on('input', function() {
+                clearTimeout(searchTimeout);
+                const search = $(this).val();
+
+                searchTimeout = setTimeout(function() {
+                    loadDevices(search);
+                }, 300);
+            });
+
+            // Clear search button
+            $('#clearSearch').click(function() {
+                $('#searchInput').val('');
+                loadDevices();
+            });
+
+            // Refresh button
+            $('#refreshBtn').click(function() {
+                const search = $('#searchInput').val();
+                loadDevices(search);
+                loadStatistics();
+
+                // Add rotation animation
+                $(this).find('i').addClass('rotate');
+                setTimeout(() => {
+                    $(this).find('i').removeClass('rotate');
+                }, 500);
+            });
+
+            // Initial load
+            loadStatistics();
+            loadDevices();
+
+            // Auto-refresh every 30 seconds
+            setInterval(function() {
+                const search = $('#searchInput').val();
+                loadDevices(search);
+                loadStatistics();
+            }, 30000);
+        });
+    </script>
+</body>
+</html>
