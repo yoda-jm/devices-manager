@@ -34,7 +34,7 @@ public class DeviceViewController {
         List<DeviceDTO> devices = deviceViewerService.searchDevices(search)
                 .stream()
                 .map(DeviceDTO::fromEntity)
-                .collect(Collectors.toList());
+                .toList();
 
         return ResponseEntity.ok(devices);
     }

@@ -6,6 +6,8 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=yoda-jm_device-manager-devsecops-interview-task&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=yoda-jm_device-manager-devsecops-interview-task)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=yoda-jm_device-manager-devsecops-interview-task&metric=coverage)](https://sonarcloud.io/summary/new_code?id=yoda-jm_device-manager-devsecops-interview-task)
 
+A device tracking system for identifying the most frequently used device types across multiple platforms.
+
 ## Docker Images
 
 **Statistics API**
@@ -19,8 +21,6 @@
 **Device Viewer**
 [![Docker Pulls](https://img.shields.io/docker/pulls/vincentleligeour/devices-manager-device-viewer?label=pulls)](https://hub.docker.com/r/vincentleligeour/devices-manager-device-viewer)
 [![Docker Image Size](https://img.shields.io/docker/image-size/vincentleligeour/devices-manager-device-viewer?label=size)](https://hub.docker.com/r/vincentleligeour/devices-manager-device-viewer)
-
-A device tracking system for identifying the most frequently used device types across multiple platforms.
 
 ## Overview
 
